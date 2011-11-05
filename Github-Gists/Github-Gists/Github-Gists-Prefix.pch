@@ -1,0 +1,7 @@
+//
+// Prefix header for all source files of the 'Github-Gists' target in the 'Github-Gists' project
+//
+
+#ifdef __OBJC__
+    #import <UIKit/UIKit.h>
+#endif

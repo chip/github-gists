@@ -1,0 +1,126 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <title>PhoneGap</title>
+        <script type="text/javascript" charset="utf-8" src="phonegap-0.9.3.js"></script>
+        <link rel="stylesheet" href="jquery.mobile-1.0a1.min.css" /> 
+        <link rel="stylesheet" href="highlight/styles/github.css">
+        <script src="jquery-1.4.3.min.js"></script> 
+        <script src="jquery.mobile-1.0a1.min.js"></script>
+        <script src="highlight/highlight.pack.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <script type="text/javascript">
+          $( function() {
+
+            var API_URL = 'https://api.github.com';
+
+            $.ajaxSetup({
+                dataType: 'jsonp',
+                beforeSend: function(xhr) {
+                  xhr.setRequestHeader("Access-Control-Allow-Origin", "*");
+                  xhr.setRequestHeader("Authorization", "Basic Y2hpcDpIZWR1MDkxMA==");
+                },
+                error: function(xhr, status, error) {
+                  alert('error: ' + error);
+                },
+                complete: function() {
+                }
+            });
+
+            $('#searchButton').click(function() {
+              $.ajax({ url: API_URL + '/users/chip/gists', success: list });
+            });
+
+            $('.gist').live('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.dir(e);
+                var id = $(this).attr("id");
+                var gist_url = API_URL + '/gists/' + id;
+                $.ajax({ url: gist_url, success: show});
+            });
+
+            document.addEventListener("deviceready", onDeviceReady, false);
+            $('#searchButton').click();
+          });
+
+          function show(data, status, xhr) {
+            console.dir(data);
+            var json = data.data;
+            var files = json.files;
+
+            var content = '';
+            $.each(files, function(key, val) {
+              content += '<pre><code class="ruby">' + val.content + '</code></pre><br /><br />';
+              console.log(val.filename + "\n\n" + content);
+            });
+
+            //var list = $('#list');
+            //list.empty();
+            //list.listview("destroy").listview();
+            $('#code').html(content); 
+            $('pre code').each(function(i, e) {hljs.highlightBlock(e, '    ')});
+
+
+            return false;
+          }
+            
+          function list(data, status, xhr) {
+            //console.dir(data);
+
+            var items = data.data;
+            var list = $('#list');
+            list.empty();
+
+            console.dir(items);
+
+            $.each(items, function(key, val) {
+              console.log(key + ':' + val.description);
+              var description = val.description || 'No description provided';
+              //var link = '<a href="' + val.html_url + '">' + description + '</a>';
+              var link = '<a href="#" id="' + val.id + '" class="gist">' + description + '</a>';
+              list.append('<li>' + link + '</li>');
+            });
+            list.listview("destroy").listview();
+          }
+          function reachableCallback(reachability) {
+            // There is no consistency on the format of reachability
+            var networkState = reachability.code || reachability;
+            var states = {};
+            states[NetworkStatus.NOT_REACHABLE]                      = 'No network connection';
+            states[NetworkStatus.REACHABLE_VIA_CARRIER_DATA_NETWORK] = 'Carrier data connection';
+            states[NetworkStatus.REACHABLE_VIA_WIFI_NETWORK]         = 'WiFi connection';
+            alert('Connection type: ' + states[networkState]);
+          }
+          // PhoneGap is loaded and it is now safe to make calls PhoneGap methods
+          function onDeviceReady() {
+            navigator.network.isReachable('phonegap.com', reachableCallback);
+          }
+
+        </script>  
+    </head>
+    <body>
+        <div data-role="page" id="home"> 
+            <div data-role="header" data-position="fixed"> 
+                <h1>Search Alternatives</h1> 
+                <div class="class= ui-body ui-body-b"> 
+                    <input type="text" name="search" id="searchBox" value="" data-theme="a" /> 
+                    <button type="submit" data-theme="a" id="searchButton">Search</button>     
+                </div>
+            </div>
+            <div data-role="content"> 
+                <ul data-role="listview" id="list"></ul> 
+
+                <div id="code"></div>
+            </div> 
+        </div>
+        <div data-role="page" id="recent"> 
+            <div data-role="header"> 
+                <h1> Recent Alternatives</h1> 
+            </div> 
+            <div data-role="content"> 
+                <p>This app rocks!</p> 
+            </div>
+        </div>
+    </body>
+</html>
